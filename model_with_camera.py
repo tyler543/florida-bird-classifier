@@ -27,8 +27,8 @@ net, model_info = birder.load_pretrained_model(
 )
 
 # Get classes 
-dataset = datasets.ImageFolder(root=data_dir)
-classes = dataset.classes  # this will match the training folder order
+with open('classes.txt', 'r') as f:
+    classes = [line.strip() for line in f.readlines()]
 num_classes = len(classes)
 
 # recreate classifier head to match number of classes
