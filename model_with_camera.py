@@ -7,6 +7,7 @@ from torchvision import datasets
 import time
 import numpy as np
 import cv2 as cv
+from picamera2 import Picamera2
 from config import *
 # Config 
 model_name = MODEL_NAME
@@ -69,14 +70,22 @@ transform = transforms.Compose([
     )
 ])
 
-# rename to your camera
+# for webcam input, use OpenCV to capture frames
+'''
 cap = cv.VideoCapture(0)
 if not cap.isOpened():
     print("Cannot open camera")
     exit()
+'''
+picam2 = Picamera2()
+picam2.configure(picam2.create_preview_configuration(
+    main={"format": "RGB888", "size": (640, 480)}
+    )
+)
+picam2.start()
 while True:
     # Capture frame-by-frame
-    ret, frame = cap.read()
+    frame = picam2.capture_array()
 
     # if frame is read correctly ret is True
     if not ret:
@@ -120,6 +129,6 @@ while True:
         print(f"Model inference time: {(inference_time):.2f} seconds") 
     # Preprocess frame
     
-# When everything done, release the capture
-cap.release()
+# clean up
+picam2.stop()
 cv.destroyAllWindows()
