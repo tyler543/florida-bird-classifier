@@ -8,7 +8,7 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 # Paths
 DATA_DIR = os.path.join(BASE_DIR, "florida_birds")
-MODEL_PATH = os.path.join(BASE_DIR, "models", "demo_model.pth")
+MODEL_PATH = os.path.join(BASE_DIR, "models", "florida_birds_v1_final.pth")
 TEST_IMAGE = os.path.join(BASE_DIR, "test.jpg")
 
 # Model
