@@ -86,12 +86,7 @@ picam2.start()
 while True:
     # Capture frame-by-frame
     frame = picam2.capture_array()
-
-    # if frame is read correctly ret is True
-    if not ret:
-        print("Can't receive frame (stream end?). Exiting ...")
-        break
-    # Our operations on the frame come here
+    
     # Display the resulting frame
     cv.imshow('frame', frame)
     if cv.waitKey(1) == ord('q'):
