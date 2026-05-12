@@ -24,6 +24,7 @@ DEGRADE_SIZE = 128
 # Inference
 INFERENCE_HZ = 1
 TOP_N = 5
+BUTTON_GPIO = 0 # BCM pin for the hold-to-infer button
 
 # Device
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
