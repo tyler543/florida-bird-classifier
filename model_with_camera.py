@@ -20,6 +20,7 @@ inference_hz = INFERENCE_HZ # inference per second
 inference_interval = 1.0 / inference_hz
 last_inference_time = 0.0
 last_result = None
+frames_probabilities = []
 
 # Load base model 
 net, model_info = birder.load_pretrained_model(
@@ -114,14 +115,25 @@ while True:
         top_probs, top_indices = torch.topk(probs, top_n)
         top_probs_renorm = top_probs / top_probs.sum()
         
+        if len(frames_probabilities) >= 10:
+           avg_probs = torch.stack(frames_probabilities).mean(dim=0)
+        
+        print("\n--- Inference Result ---")
+        print(f"Top {top_n} predictions:")
+        for i, p in zip(top_indices, avg_probs):
+            print(f"{classes[top_indices[i]]}: {p.item():.4f}")
+        print(f"Predicted class: {classes[top_indices[avg_probs.argmax()]]}")
+            
+        '''
         print("Top predictions:")
         for i, p in zip(top_indices, top_probs_renorm):
             print(f"{classes[i]}: {p.item():.4f}")
-            
+        
         pred_idx = torch.argmax(probs).item()
         # best prediction
         print(f"\nPredicted class: {classes[pred_idx]}")
-        print(f"Model inference time: {(inference_time):.2f} seconds") 
+        print(f"Model inference time: {(inference_time):.2f} seconds")
+        '''
     # Preprocess frame
     
 # clean up
