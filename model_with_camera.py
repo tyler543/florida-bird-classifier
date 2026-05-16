@@ -124,7 +124,7 @@ while True:
             for i, p in zip(top_indices, top_probs_renorm):
                 print(f"{classes[i]}: {p.item():.4f}")
             print(f"Predicted class: {classes[top_indices[avg_probs.argmax()]]}")
-            
+        frames_probabilities = [] # reset
         '''
         print("Top predictions:")
         for i, p in zip(top_indices, top_probs_renorm):
