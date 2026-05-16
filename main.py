@@ -127,16 +127,6 @@ while True:
             print(f"Predicted class: {classes[top_indices[avg_probs.argmax()]]}")
             
             frames_probabilities = [] # reset
-        '''
-        print("Top predictions:")
-        for i, p in zip(top_indices, top_probs_renorm):
-            print(f"{classes[i]}: {p.item():.4f}")
-        
-        pred_idx = torch.argmax(probs).item()
-        # best prediction
-        print(f"\nPredicted class: {classes[pred_idx]}")
-        print(f"Model inference time: {(inference_time):.2f} seconds")
-        '''
     # Preprocess frame
     
 # clean up
