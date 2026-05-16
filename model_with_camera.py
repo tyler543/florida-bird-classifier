@@ -21,6 +21,7 @@ inference_interval = 1.0 / inference_hz
 last_inference_time = 0.0
 last_result = None
 frames_probabilities = []
+frame_avg_size = FRAME_AVERAGE_SIZE
 
 # Load base model 
 net, model_info = birder.load_pretrained_model(
@@ -116,7 +117,7 @@ while True:
         top_probs_renorm = top_probs / top_probs.sum()
         frames_probabilities.append(top_probs_renorm)
         
-        if len(frames_probabilities) >= 10:
+        if len(frames_probabilities) >= frame_avg_size:
             avg_probs = torch.stack(frames_probabilities).mean(dim=0)
         
             print("\n--- Inference Result ---")
