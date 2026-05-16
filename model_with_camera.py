@@ -122,7 +122,7 @@ while True:
             print("\n--- Inference Result ---")
             print(f"Top {top_n} predictions:")
             for i, p in zip(top_indices, top_probs_renorm):
-                print(f"{classes[top_indices[i]]}: {p.item():.4f}")
+                print(f"{classes[i]}: {p.item():.4f}")
             print(f"Predicted class: {classes[top_indices[avg_probs.argmax()]]}")
             
         '''
