@@ -114,15 +114,16 @@ while True:
         top_n = 5
         top_probs, top_indices = torch.topk(probs, top_n)
         top_probs_renorm = top_probs / top_probs.sum()
+        frames_probabilities.append(top_probs_renorm)
         
         if len(frames_probabilities) >= 10:
-           avg_probs = torch.stack(frames_probabilities).mean(dim=0)
+            avg_probs = torch.stack(frames_probabilities).mean(dim=0)
         
-        print("\n--- Inference Result ---")
-        print(f"Top {top_n} predictions:")
-        for i, p in zip(top_indices, avg_probs):
-            print(f"{classes[top_indices[i]]}: {p.item():.4f}")
-        print(f"Predicted class: {classes[top_indices[avg_probs.argmax()]]}")
+            print("\n--- Inference Result ---")
+            print(f"Top {top_n} predictions:")
+            for i, p in zip(top_indices, top_probs_renorm):
+                print(f"{classes[top_indices[i]]}: {p.item():.4f}")
+            print(f"Predicted class: {classes[top_indices[avg_probs.argmax()]]}")
             
         '''
         print("Top predictions:")
