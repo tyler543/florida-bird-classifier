@@ -24,7 +24,7 @@ DEGRADE_SIZE = 128
 # Inference
 INFERENCE_HZ = 1
 TOP_N = 5
-FRAME_AVERAGE_SIZE = 5
+FRAME_AVERAGE_SIZE = 5 # amount of frames 
 BUTTON_GPIO = None # BCM pin for the hold-to-infer button
 
 # Device
