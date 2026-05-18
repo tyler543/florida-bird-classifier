@@ -56,5 +56,7 @@ typing_extensions==4.15.0
 webdataset==1.0.2
 Werkzeug==3.1.5
 wheel==0.46.3
+requests==2.32.3
+python-dotenv==1.0.1
 # For GPU support (comment out if using CPU)
 # pip install torch==2.7.0 torchvision torchaudio --index-url https://download.pytorch.org/whl/cu128
