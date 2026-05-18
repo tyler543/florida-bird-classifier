@@ -1,8 +1,11 @@
 # config.py
 # Central configuration file — edit paths and settings here
 
+from dotenv import load_dotenv
 import os
 import torch
+
+load_dotenv()
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
@@ -26,6 +29,11 @@ INFERENCE_HZ = 1
 TOP_N = 5
 FRAME_AVERAGE_SIZE = 5 # amount of frames 
 BUTTON_GPIO = None # BCM pin for the hold-to-infer button
+
+# API Keys
+EBIRD_API_KEY = os.getenv("EBIRD_API_KEY")
+SUPABASE_URL = os.getenv("SUPABASE_URL")
+SUPABASE_KEY = os.getenv("SUPABASE_KEY")
 
 # Device
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
