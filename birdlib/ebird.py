@@ -11,12 +11,12 @@ def get_species_info(species_name):
     if code is None:
         print(f"No eBird code found for {species_name}")
         return None
-    
+
     url = f"https://api.ebird.org/v2/ref/taxonomy/ebird?species={code}&fmt=json"
     headers = {"X-eBirdApiToken": EBIRD_API_KEY}
     
     response = requests.get(url, headers=headers)
-    
+
     if response.status_code == 200:
         data = response.json()
         if data:
@@ -34,7 +34,3 @@ def get_species_info(species_name):
     else:
         print(f"eBird API error: {response.status_code}")
         return None
-    
-if __name__ == "__main__":
-    info = get_species_info("Sandhill_Crane")
-    print(info)

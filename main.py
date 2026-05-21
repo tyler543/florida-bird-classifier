@@ -9,6 +9,8 @@ import numpy as np
 import cv2 as cv
 from picamera2 import Picamera2
 from config import *
+from birdlib.ebird import get_species_info
+from birdlib.supabase import insert_sighting
 # Config 
 model_name = MODEL_NAME
 model_path = MODEL_PATH 
@@ -36,7 +38,7 @@ num_classes = len(classes)
 
 # recreate classifier head to match number of classes
 if hasattr(net, 'classifier'):
-    
+
     if isinstance(net.classifier, nn.Sequential):
         in_features = net.classifier[-1].in_features
         net.classifier[-1] = nn.Linear(in_features, num_classes)
@@ -72,13 +74,6 @@ transform = transforms.Compose([
     )
 ])
 
-# for webcam input, use OpenCV to capture frames
-'''
-cap = cv.VideoCapture(0)
-if not cap.isOpened():
-    print("Cannot open camera")
-    exit()
-'''
 picam2 = Picamera2()
 picam2.configure(picam2.create_preview_configuration(
     main={"format": "RGB888", "size": (640, 480)}
@@ -88,47 +83,65 @@ picam2.start()
 while True:
     # Capture frame-by-frame
     frame = picam2.capture_array()
-    
+
     # Display the resulting frame
     cv.imshow('frame', frame)
     if cv.waitKey(1) == ord('q'):
         break
-    
+
     now = time.perf_counter()
     if now - last_inference_time >= inference_interval:
         last_inference_time = now 
-        
+
         start_time = time.perf_counter()
-        
+
         img = Image.fromarray(frame[:,:,::-1]).convert("RGB")
         
         # img.save("debug_webcam_input.jpg")
-        
+
         x = transform(img).unsqueeze(0).to(device)
         with torch.no_grad():
             logits = net(x)
             probs = torch.softmax(logits, dim=1)[0]
-        
+
         inference_time = time.perf_counter() - start_time
-        
+
         last_result = probs.cpu()
         top_n = 5
         top_probs, top_indices = torch.topk(probs, top_n)
         top_probs_renorm = top_probs / top_probs.sum()
         frames_probabilities.append(top_probs_renorm)
-        
+
+
+
         if len(frames_probabilities) >= frame_avg_size:
             avg_probs = torch.stack(frames_probabilities).mean(dim=0)
-        
+
+            predicted_species = classes[top_indices[avg_probs.argmax()]]
+            confidence = avg_probs.max().item()
+
             print("\n--- Inference Result ---")
             print(f"Top {top_n} predictions:")
-            for i, p in zip(top_indices, top_probs_renorm):
+            for i, p in zip(top_indices, avg_probs):
                 print(f"{classes[i]}: {p.item():.4f}")
-            print(f"Predicted class: {classes[top_indices[avg_probs.argmax()]]}")
-            
+            print(f"Predicted class: {predicted_species} with confidence {confidence:.4f}")
+
+            top_5  = {classes[i]: p.item() for i, p in zip(top_indices, avg_probs)}
+
+            if predicted_species != "unknown":
+                ebird_info = get_species_info(predicted_species)
+                insert_sighting(
+                    predicted_species=predicted_species,
+                    confidence=confidence,
+                    top_5=top_5,
+                    ebird_info=ebird_info
+                )
+            else:
+                print("Predicted species is unknown, not saving sighting.")
+
             frames_probabilities = [] # reset
     # Preprocess frame
-    
+
 # clean up
 picam2.stop()
 cv.destroyAllWindows()
