@@ -39,8 +39,11 @@ The image is a Mallard
 ### Train the model
 python train_validate.py
 
-### Run live inference
-python model_with_camera.py
+### Run live inference (Raspi 5)
+python main.py
+
+### Run live inference (Windows w/ webcam)
+python mainW.py
 
 ## Requirements
 - Python 3.10+
@@ -48,6 +51,12 @@ python model_with_camera.py
 - OpenCV
 - Birder
 - Raspberry Pi 5 with Pi Camera Module 3 (for deployment)
+
+## For complete inference along with database and eBird API pipeline
+- .env file with the following:
+    - EBIRD_API_KEY
+    - SUPABASE_URL
+    - SUPABASE_KEY
 
 ## Credits
 This project uses the [Birder](https://github.com/birder-project/birder) 
