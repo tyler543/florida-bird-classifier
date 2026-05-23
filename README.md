@@ -21,6 +21,8 @@ Pi Camera Module 3 for live inference.
 - `requirements.txt` — project dependencies
 
 ## Setup
+create a virtual env via conda or venv
+venv python=3.11.7 is preferred
 
 ### Install dependencies
 pip install -r requirements.txt
