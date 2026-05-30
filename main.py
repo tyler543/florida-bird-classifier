@@ -82,6 +82,7 @@ picam2.configure(picam2.create_preview_configuration(
     main={"format": "RGB888", "size": (640, 480)}
     )
 )
+picam2.start()
 collecting = False
 while True:
     frame = picam2.capture_array()
