@@ -11,15 +11,14 @@ from picamera2 import Picamera2
 from config import *
 from birdlib.ebird import get_species_info
 from birdlib.supabase import insert_sighting
-import RPi.GPIO as GPIO
+from gpiozero import Button
 # Config 
 model_name = MODEL_NAME
 model_path = MODEL_PATH 
 data_dir = DATA_DIR  # same folder used in training
 device = DEVICE
 # Button setup
-GPIO.setmode(GPIO.BCM)
-GPIO.setup(BUTTON_GPIO, GPIO.IN, pull_up_down=GPIO.PUD_UP)  # pull-up resistor
+button = Button(BUTTON_GPIO, pull_up=True)  # pull-up resistor
 
 # variables
 inference_hz = INFERENCE_HZ # inference per second
@@ -90,7 +89,7 @@ while True:
     if cv.waitKey(1) == ord('q'):
         break
 
-    button_held = GPIO.input(BUTTON_GPIO) == GPIO.LOW
+    button_held = button.is_pressed 
 
     if button_held and not collecting:
         # button just pressed, start collecting
@@ -156,9 +155,5 @@ while True:
         frames_probabilities = []
 
 # cleanup
-GPIO.cleanup()
-picam2.stop()
-cv.destroyAllWindows()
-# clean up
 picam2.stop()
 cv.destroyAllWindows()
