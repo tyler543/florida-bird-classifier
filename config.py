@@ -24,11 +24,11 @@ LR = 1e-3
 SEED = 42
 DEGRADE_SIZE = 128
 
-# Inference
-INFERENCE_HZ = 1
+# Inference (current set up is 12 frames over 3 seconds)
+INFERENCE_HZ = 4
 TOP_N = 5
-FRAME_AVERAGE_SIZE = 5 # amount of frames 
-BUTTON_GPIO = None # BCM pin for the hold-to-infer button
+FRAME_AVERAGE_SIZE = 12 # amount of frames 
+BUTTON_GPIO = 27 # BCM pin for the hold-to-infer button
 
 # API Keys
 EBIRD_API_KEY = os.getenv("EBIRD_API_KEY")
