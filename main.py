@@ -11,11 +11,15 @@ from picamera2 import Picamera2
 from config import *
 from birdlib.ebird import get_species_info
 from birdlib.supabase import insert_sighting
+import RPi.GPIO as GPIO
 # Config 
 model_name = MODEL_NAME
 model_path = MODEL_PATH 
 data_dir = DATA_DIR  # same folder used in training
 device = DEVICE
+# Button setup
+GPIO.setmode(GPIO.BCM)
+GPIO.setup(BUTTON_GPIO, GPIO.IN, pull_up_down=GPIO.PUD_UP)  # pull-up resistor
 
 # variables
 inference_hz = INFERENCE_HZ # inference per second
@@ -79,69 +83,82 @@ picam2.configure(picam2.create_preview_configuration(
     main={"format": "RGB888", "size": (640, 480)}
     )
 )
-picam2.start()
+collecting = False
 while True:
-    # Capture frame-by-frame
     frame = picam2.capture_array()
-
-    # Display the resulting frame
     cv.imshow('frame', frame)
     if cv.waitKey(1) == ord('q'):
         break
 
-    now = time.perf_counter()
-    if now - last_inference_time >= inference_interval:
-        last_inference_time = now 
+    button_held = GPIO.input(BUTTON_GPIO) == GPIO.LOW
 
-        start_time = time.perf_counter()
+    if button_held and not collecting:
+        # button just pressed, start collecting
+        collecting = True
+        frames_probabilities = []
+        print("Button held — collecting frames...")
 
-        img = Image.fromarray(frame[:,:,::-1]).convert("RGB")
-        
-        # img.save("debug_webcam_input.jpg")
+    elif button_held and collecting:
+        # still holding, run inference on this frame
+        now = time.perf_counter()
+        if now - last_inference_time >= inference_interval:
+            last_inference_time = now
 
-        x = transform(img).unsqueeze(0).to(device)
-        with torch.no_grad():
-            logits = net(x)
-            probs = torch.softmax(logits, dim=1)[0]
+            start_time = time.perf_counter()
+            img = Image.fromarray(frame[:,:,::-1]).convert("RGB")
+            x = transform(img).unsqueeze(0).to(device)
 
-        inference_time = time.perf_counter() - start_time
+            with torch.no_grad():
+                logits = net(x)
+                probs = torch.softmax(logits, dim=1)[0]
 
-        last_result = probs.cpu()
-        top_n = 5
-        top_probs, top_indices = torch.topk(probs, top_n)
-        top_probs_renorm = top_probs / top_probs.sum()
-        frames_probabilities.append(top_probs_renorm)
+            inference_time = time.perf_counter() - start_time
 
+            top_probs, top_indices = torch.topk(probs, TOP_N)
+            top_probs_renorm = top_probs / top_probs.sum()
+            frames_probabilities.append(top_probs_renorm)
 
+            print(f"Frame {len(frames_probabilities)}/{FRAME_AVERAGE_SIZE} captured")
 
-        if len(frames_probabilities) >= frame_avg_size:
-            avg_probs = torch.stack(frames_probabilities).mean(dim=0)
+            if len(frames_probabilities) >= FRAME_AVERAGE_SIZE:
+                avg_probs = torch.stack(frames_probabilities).mean(dim=0)
+                predicted_species = classes[top_indices[avg_probs.argmax()]]
+                confidence = avg_probs.max().item()
 
-            predicted_species = classes[top_indices[avg_probs.argmax()]]
-            confidence = avg_probs.max().item()
+                print("\n--- Inference Result ---")
+                print(f"Top {TOP_N} predictions:")
+                for i, p in zip(top_indices, avg_probs):
+                    print(f"{classes[i]}: {p.item():.4f}")
+                print(f"Predicted class: {predicted_species} with confidence {confidence:.4f}")
 
-            print("\n--- Inference Result ---")
-            print(f"Top {top_n} predictions:")
-            for i, p in zip(top_indices, avg_probs):
-                print(f"{classes[i]}: {p.item():.4f}")
-            print(f"Predicted class: {predicted_species} with confidence {confidence:.4f}")
+                top_5 = {classes[i]: p.item() for i, p in zip(top_indices, avg_probs)}
 
-            top_5  = {classes[i]: p.item() for i, p in zip(top_indices, avg_probs)}
+                if predicted_species != "unknown":
+                    ebird_info = get_species_info(predicted_species)
+                    insert_sighting(
+                        predicted_species=predicted_species,
+                        confidence=confidence,
+                        top_5=top_5,
+                        ebird_info=ebird_info
+                    )
+                else:
+                    print("Unknown species — skipping eBird and Supabase")
 
-            if predicted_species != "unknown":
-                ebird_info = get_species_info(predicted_species)
-                insert_sighting(
-                    predicted_species=predicted_species,
-                    confidence=confidence,
-                    top_5=top_5,
-                    ebird_info=ebird_info
-                )
-            else:
-                print("Predicted species is unknown, not saving sighting.")
+                # wait for button release before allowing next prediction
+                collecting = False
+                frames_probabilities = []
 
-            frames_probabilities = [] # reset
-    # Preprocess frame
+    elif not button_held and collecting:
+        # let go early
+        if len(frames_probabilities) < FRAME_AVERAGE_SIZE:
+            print(f"Button released too early — hold for the full 3 seconds ({FRAME_AVERAGE_SIZE} frames needed, got {len(frames_probabilities)})")
+        collecting = False
+        frames_probabilities = []
 
+# cleanup
+GPIO.cleanup()
+picam2.stop()
+cv.destroyAllWindows()
 # clean up
 picam2.stop()
 cv.destroyAllWindows()
