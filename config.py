@@ -28,7 +28,7 @@ DEGRADE_SIZE = 128
 INFERENCE_HZ = 4
 TOP_N = 5
 FRAME_AVERAGE_SIZE = 12 # amount of frames 
-BUTTON_GPIO = 27 # BCM pin for the hold-to-infer button
+BUTTON_GPIO = 23 # BCM pin for the hold-to-infer button
 
 # API Keys
 EBIRD_API_KEY = os.getenv("EBIRD_API_KEY")
