@@ -11,7 +11,7 @@ from birdlib.inference import (
     get_top_predictions,
     extract_topk_and_normalize
 )
-from birdlib.camera import init_camera, capture_frame, stop_camera
+from birdlib.camera import init_camera, capture_frame, stop_camera, capture_lores_frame
 from birdlib.utils import timer_start, timer_stop
 from birdlib.button import init_button
 from birdlib.results import print_results, send_results
@@ -40,11 +40,16 @@ waiting_for_release = False
 picam2 = init_camera()
 
 while True:
-    frame = capture_frame(picam2)
+    frame = capture_frame(picam2) # full res display
+    lores_frame = capture_lores_frame(picam2) # low res for inference
+    '''
+    removed for Raspi OS LITE (no display)
+    
     cv.imshow('frame', frame)
     if cv.waitKey(1) == ord('q'):
         break
-
+    '''
+    
     button_held = button.is_pressed 
 
     if waiting_for_release:
@@ -67,7 +72,7 @@ while True:
 
             start_time = timer_start()
             probs = run_inference(
-                frame, 
+                lores_frame, 
                 net, 
                 transform, 
                 DEVICE
