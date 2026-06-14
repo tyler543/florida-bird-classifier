@@ -1,10 +1,9 @@
 from picamera2 import Picamera2, Preview
-from picamera2.previews import DRMPreview
 
 def init_camera(width=1920, height=1080):
     picam2 = Picamera2()
 
-    picam2.start_preview(DRMPreview())
+    picam2.start_preview(Preview.DRM)
     picam2.configure(picam2.create_preview_configuration(
         main={"format": "RGB888", "size": (width, height)},
         lores={"format": "YUV420", "size": (640, 480)}
