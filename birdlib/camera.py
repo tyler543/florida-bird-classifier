@@ -1,5 +1,5 @@
-from picamera2 import Picamera2
-from picamera2.preview import DRMPreview
+from picamera2 import Picamera2, Preview
+from picamera2.previews import DRMPreview
 
 def init_camera(width=1920, height=1080):
     picam2 = Picamera2()
