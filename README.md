@@ -27,6 +27,9 @@ venv python=3.11.7 is preferred
 ### Install dependencies
 pip install -r requirements.txt
 
+## Dependencies for Pi
+sudo apt install -y python3-opencv python3-picamera2 libcamera-apps python3-pip python3-venv git
+
 ### Configure paths
 Edit `config.py` to set your data directory, model path, and other settings.
 
