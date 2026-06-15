@@ -72,7 +72,7 @@ while True:
 
             start_time = timer_start()
             probs = run_inference(
-                lores_frame, 
+                frame, 
                 net, 
                 transform, 
                 DEVICE
