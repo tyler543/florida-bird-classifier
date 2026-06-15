@@ -41,7 +41,7 @@ picam2 = init_camera()
 
 while True:
     frame = capture_frame(picam2) # full res display
-    lores_frame = capture_lores_frame(picam2) # low res for inference
+    #lores_frame = capture_lores_frame(picam2) # low res for inference
     '''
     removed for Raspi OS LITE (no display)
     
