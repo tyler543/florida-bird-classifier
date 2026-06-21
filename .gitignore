@@ -1,3 +1,8 @@
+# Models (ignore new files, keep already-tracked ones)
+models/*
+!models/florida_birds_v1_final.pth
+!models/mobilenet_v4_s_il-common.pt
+
 # Training data
 florida_birds/
 florida_bird_temp/
