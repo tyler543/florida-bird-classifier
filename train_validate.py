@@ -1,7 +1,7 @@
 import os
 import torch
 from torch import nn, optim
-from torch.utils.data import DataLoader, random_split
+from torch.utils.data import DataLoader, Subset
 from torchvision import datasets, transforms
 import birder
 import time
@@ -31,9 +31,9 @@ net, model_info = birder.load_pretrained_model(model_name, inference=False)
 size = birder.get_size_from_signature(model_info.signature)
 rgb_stats = model_info.rgb_stats
 
-degrade_size = 128
-# Dataset & transforms 
-transform = transforms.Compose([
+degrade_size = DEGRADE_SIZE
+
+train_transform = transforms.Compose([
     transforms.Resize(degrade_size, interpolation=transforms.InterpolationMode.BILINEAR),
     transforms.Resize(size, interpolation=transforms.InterpolationMode.BILINEAR),
     transforms.RandomHorizontalFlip(),
@@ -42,19 +42,25 @@ transform = transforms.Compose([
     transforms.Normalize(mean=rgb_stats["mean"], std=rgb_stats["std"])
 ])
 
-full_dataset = datasets.ImageFolder(root=data_dir, transform=transform)
+val_transform = transforms.Compose([
+    transforms.Resize(size, interpolation=transforms.InterpolationMode.BILINEAR),
+    transforms.CenterCrop(size),
+    transforms.ToTensor(),
+    transforms.Normalize(mean=rgb_stats["mean"], std=rgb_stats["std"])
+])
 
-#  Dataset split (80 / 20) 
-total_images = len(full_dataset)
+train_dataset_full = datasets.ImageFolder(root=data_dir, transform=train_transform)
+val_dataset_full = datasets.ImageFolder(root=data_dir, transform=val_transform)
+
+#  Dataset split (80 / 20)
+total_images = len(train_dataset_full)
 train_size = int(0.8 * total_images)
 val_size = total_images - train_size
 
 generator = torch.Generator().manual_seed(seed)
-train_dataset, val_dataset = random_split(
-    full_dataset,
-    [train_size, val_size],
-    generator=generator
-)
+perm = torch.randperm(total_images, generator=generator).tolist()
+train_dataset = Subset(train_dataset_full, perm[:train_size])
+val_dataset = Subset(val_dataset_full, perm[train_size:])
 
 print(f"\nTotal images: {total_images}")
 print(f"Training images: {train_size}")
@@ -76,8 +82,8 @@ val_loader = DataLoader(
 )
 
 #  Replace classifier 
-num_classes = len(full_dataset.classes)
-print("Classes:", full_dataset.classes)
+num_classes = len(train_dataset_full.classes)
+print("Classes:", train_dataset_full.classes)
 
 if hasattr(net, "classifier"):
     if isinstance(net.classifier, nn.Sequential):
