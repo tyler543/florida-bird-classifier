@@ -61,11 +61,11 @@ transform = transforms.Compose([
     )
 ])
 
-start_time = time.perf_counter()
+
 #  Load & preprocess image 
 img = Image.open(image_path).convert("RGB")
 x = transform(img).unsqueeze(0).to(device)
-
+start_time = time.perf_counter()
 # Inference
 with torch.no_grad():
    
