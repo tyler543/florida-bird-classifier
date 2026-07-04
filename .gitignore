@@ -7,6 +7,10 @@ models/*
 florida_birds/
 florida_bird_temp/
 
+# Plots
+plots/
+plots.py
+
 # Docs
 *.docx
 
