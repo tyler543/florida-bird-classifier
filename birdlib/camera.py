@@ -12,7 +12,7 @@ def init_camera(width=1920, height=1080):
     ))
     picam2.start_preview(Preview.DRM, x=0, y=0, width=width, height=height)
     picam2.start()
-    picam2.set_controls({"AfMode": controls.AfModeEnum.Continuous})
+    picam2.set_controls({"AfMode": controls.AfModeEnum.Continuous, "AfSpeed": controls.AfSpeedEnum.Fast})
     return picam2
 
 def capture_frame(picam2):

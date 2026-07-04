@@ -11,6 +11,7 @@ from birdlib.inference import (
     get_top_predictions,
     extract_topk_and_normalize
 )
+from libcamera import controls
 from birdlib.camera import init_camera, capture_frame, stop_camera, capture_lores_frame
 from birdlib.utils import timer_start, timer_stop
 from birdlib.button import init_button
@@ -59,9 +60,10 @@ while True:
         continue
     
     elif button_held and not collecting:
-        # button just pressed
+        # button just pressed — lock focus on whatever is in frame
         collecting = True
         frames_probabilities = []
+        picam2.set_controls({"AfMode": controls.AfModeEnum.Auto, "AfTrigger": controls.AfTriggerEnum.Start})
         print("Button held — collecting frames...")
 
     elif button_held and collecting:
@@ -111,7 +113,8 @@ while True:
                 frames_probabilities = []
 
     elif not button_held and collecting:
-        # let go early
+        # button released — return to continuous AF
+        picam2.set_controls({"AfMode": controls.AfModeEnum.Continuous})
         if len(frames_probabilities) < FRAME_AVERAGE_SIZE:
             print(f"Button released too early — hold for the full 3 seconds ({FRAME_AVERAGE_SIZE} frames needed, got {len(frames_probabilities)})")
         collecting = False
