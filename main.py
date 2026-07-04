@@ -3,17 +3,16 @@ import cv2 as cv
 
 from config import *
 from birdlib.inference import (
-    load_classes, 
-    load_model, 
+    load_classes,
+    load_model,
     build_transform,
     run_inference,
     average_frames,
     get_top_predictions,
-    extract_topk_and_normalize
+    extract_topk_and_normalize,
 )
 from libcamera import controls
 from birdlib.camera import init_camera, capture_frame, stop_camera, capture_lores_frame
-from birdlib.utils import timer_start, timer_stop
 from birdlib.button import init_button
 from birdlib.results import print_results, send_results
 # variables
@@ -64,6 +63,8 @@ while True:
         collecting = True
         frames_probabilities = []
         picam2.set_controls({"AfMode": controls.AfModeEnum.Auto, "AfTrigger": controls.AfTriggerEnum.Start})
+        time.sleep(0.3)
+        picam2.set_controls({"AfMode": controls.AfModeEnum.Manual, "LensPosition": picam2.capture_metadata()["LensPosition"]})
         print("Button held — collecting frames...")
 
     elif button_held and collecting:
@@ -72,20 +73,12 @@ while True:
         if now - last_inference_time >= inference_interval:
             last_inference_time = now
 
-            start_time = timer_start()
             probs = run_inference(
-                frame, 
-                net, 
-                transform, 
+                frame,
+                net,
+                transform,
                 DEVICE
             )
-            inference_time = timer_stop(start_time)
-            
-            top_probs, top_indices = extract_topk_and_normalize(
-                probs, 
-                TOP_N
-            )
-            
             frames_probabilities.append(probs.cpu())
 
             print(f"Frame {len(frames_probabilities)}/{FRAME_AVERAGE_SIZE} captured")
@@ -107,10 +100,10 @@ while True:
                
                 print_results(predicted_species, confidence, top_5, TOP_N)
                 send_results(predicted_species, confidence, top_5)
-                
-                # wait for button release before allowing next prediction
+
                 collecting = False
                 frames_probabilities = []
+                waiting_for_release = True
 
     elif not button_held and collecting:
         # button released — return to continuous AF
