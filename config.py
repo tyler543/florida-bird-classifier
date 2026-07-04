@@ -31,6 +31,7 @@ BUTTON_GPIO = 23 # BCM pin for the hold-to-infer button
 EBIRD_API_KEY = os.getenv("EBIRD_API_KEY")
 SUPABASE_URL = os.getenv("SUPABASE_URL")
 SUPABASE_KEY = os.getenv("SUPABASE_KEY")
+TUNING_FILE = os.getenv("TUNING_FILE")
 
 # Device
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
