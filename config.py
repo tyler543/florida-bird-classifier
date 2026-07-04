@@ -1,6 +1,3 @@
-# config.py
-# Central configuration file — edit paths and settings here
-
 from dotenv import load_dotenv
 import os
 import torch
