@@ -53,9 +53,9 @@ while True:
     button_held = button.is_pressed 
 
     if waiting_for_release:
-        # button release after prediction
         if not button_held:
             waiting_for_release = False
+            picam2.set_controls({"AfMode": controls.AfModeEnum.Continuous})
         continue
     
     elif button_held and not collecting:
