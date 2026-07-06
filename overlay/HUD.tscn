@@ -1,0 +1,17 @@
+[gd_scene format=3 uid="uid://c7nhkkx242mer"]
+
+[ext_resource type="Script" uid="uid://bt7xx5vjwnhc" path="res://hud_(control).gd" id="1_k5de2"]
+
+[node name="HUD (Control)" type="Control" unique_id=711145140]
+layout_mode = 3
+anchors_preset = 0
+offset_right = 40.0
+offset_bottom = 40.0
+script = ExtResource("1_k5de2")
+
+[node name="NameLabel" type="Label3D" parent="." unique_id=1569161524]
+text = "\"Bird: ---\""
+
+[node name="ConfidenceLabel" type="Label3D" parent="." unique_id=1399909304]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.13978228, -0.160757)
+text = "\"Confidence: ---\""

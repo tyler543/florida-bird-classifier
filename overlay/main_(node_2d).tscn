@@ -1,0 +1,26 @@
+[gd_scene format=3 uid="uid://dhgxffwb1vokl"]
+
+[ext_resource type="Script" uid="uid://c7x7ncb8w7uqg" path="res://main_(node_2d).gd" id="1_6mdtd"]
+[ext_resource type="PackedScene" uid="uid://c7nhkkx242mer" path="res://HUD.tscn" id="2_k8jom"]
+
+[node name="Main (Node3D)" type="Node3D" unique_id=1899954457]
+script = ExtResource("1_6mdtd")
+
+[node name="Camera3D" type="Camera3D" parent="." unique_id=2116241308]
+transform = Transform3D(0.9999276, -0.004035661, -0.011337958, 0.004350453, 0.9996019, 0.027878415, 0.011220936, -0.027925722, 0.99954706, -0.04578808, 0.12050539, 0.059006065)
+cull_mask = 1048569
+current = true
+fov = 150.7
+
+[node name="Bird" type="MeshInstance3D" parent="." unique_id=323875049]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.09400007, 0.034877643, -0.19237664)
+
+[node name="Box" type="Control" parent="." unique_id=627971819]
+layout_mode = 3
+anchors_preset = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="HUDLayer" type="CanvasLayer" parent="." unique_id=1487193977]
+
+[node name="HUD" parent="HUDLayer" unique_id=1135396913 instance=ExtResource("2_k8jom")]
