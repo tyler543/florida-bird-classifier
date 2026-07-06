@@ -11,8 +11,9 @@ florida_bird_temp/
 plots/
 plots.py
 
-# Docs
+# other files
 *.docx
+*.cp
 
 # Python cache
 __pycache__/

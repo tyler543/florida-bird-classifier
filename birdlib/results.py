@@ -10,7 +10,7 @@ def print_results(predicted_species, confidence, top_5, top_n):
 
     print(f"Predicted class: {predicted_species} with confidence {confidence:.4f}")
 
-def send_results(predicted_species, confidence, top_5):
+def send_results(predicted_species, confidence, top_5, sensor=None):
 
     if predicted_species == "unknown":
         print("Unknown species — skipping eBird and Supabase")
@@ -22,5 +22,6 @@ def send_results(predicted_species, confidence, top_5):
         predicted_species=predicted_species,
         confidence=confidence,
         top_5=top_5,
-        ebird_info=ebird_info
+        ebird_info=ebird_info,
+        sensor=sensor
     )

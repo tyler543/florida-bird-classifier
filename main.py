@@ -15,6 +15,7 @@ from libcamera import controls
 from birdlib.camera import init_camera, capture_frame, stop_camera, capture_lores_frame
 from birdlib.button import init_button
 from birdlib.results import print_results, send_results
+from birdlib.BLE import start_background, get_snapshot
 # variables
 inference_hz = INFERENCE_HZ # inference per second
 inference_interval = 1.0 / inference_hz
@@ -36,6 +37,8 @@ transform, size = build_transform(model_info)
 
 collecting = False
 waiting_for_release = False
+
+start_background()
 
 picam2 = init_camera()
 
@@ -99,7 +102,7 @@ while True:
                 )
                
                 print_results(predicted_species, confidence, top_5, TOP_N)
-                send_results(predicted_species, confidence, top_5)
+                send_results(predicted_species, confidence, top_5, sensor=get_snapshot())
 
                 collecting = False
                 frames_probabilities = []

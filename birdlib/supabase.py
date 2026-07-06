@@ -1,7 +1,7 @@
 import requests
 from config import SUPABASE_URL, SUPABASE_KEY
 
-def insert_sighting(predicted_species, confidence, top_5, ebird_info):
+def insert_sighting(predicted_species, confidence, top_5, ebird_info, sensor=None):
     url = f"{SUPABASE_URL}/rest/v1/bird_sightings"
 
     headers = {
@@ -15,7 +15,14 @@ def insert_sighting(predicted_species, confidence, top_5, ebird_info):
         "predicted_species": predicted_species,
         "confidence": confidence,
         "top_5": top_5,
-        "ebird_info": ebird_info
+        "ebird_info": ebird_info,
+        "lat": sensor.get("lat") if sensor else None,
+        "lon": sensor.get("lon") if sensor else None,
+        "gps_fix": sensor.get("fix") if sensor else None,
+        "temp_f": sensor.get("temp_f") if sensor else None,
+        "humidity": sensor.get("hum") if sensor else None,
+        "batt_v": sensor.get("batt_v") if sensor else None,
+        "sensor_utc": sensor.get("utc") if sensor else None,
     }
 
     response = requests.post(url, headers=headers, json=data)
