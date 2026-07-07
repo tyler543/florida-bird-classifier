@@ -16,7 +16,6 @@ from birdlib.inference import (
     get_top_predictions,
     extract_topk_and_normalize,
 )
-from libcamera import controls
 from birdlib.camera import init_camera, capture_frame, stop_camera
 from birdlib.button import init_button
 from birdlib.results import print_results, send_results
@@ -136,9 +135,6 @@ while True:
         cached_top5 = {}
         send_clear()
 
-        picam2.set_controls({"AfMode": controls.AfModeEnum.Auto, "AfTrigger": controls.AfTriggerEnum.Start})
-        time.sleep(0.3)
-        picam2.set_controls({"AfMode": controls.AfModeEnum.Manual, "LensPosition": picam2.capture_metadata()["LensPosition"]})
 
         raw_bbox = _detect_motion_bbox(bg_mask, small.shape)
         bbox_half = tuple(v * 2 for v in raw_bbox)
@@ -173,7 +169,6 @@ while True:
             send_live_frame(cached_species, cached_confidence, x=box_x, y=box_y, w=box_w, h=box_h)
 
     elif not button_held and collecting:
-        picam2.set_controls({"AfMode": controls.AfModeEnum.Continuous})
         collecting = False
         tracker = None
 
