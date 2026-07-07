@@ -6,8 +6,9 @@
 DEVICE_ID = "FEATHER-000"
 
 from supabase import create_client
-url = "https://llddhtatznrbrhxoniqc.supabase.co"
-key = "sb_publishable_48nEIOwcY4KGdg4ClqIC-w_VGsKOXLZ"
+from config import SUPABASE_URL, SUPABASE_KEY
+url = SUPABASE_URL
+key = SUPABASE_KEY
 
 supabase = create_client(url, key)
 
