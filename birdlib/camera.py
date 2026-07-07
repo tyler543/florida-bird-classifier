@@ -8,7 +8,7 @@ def init_camera(width=1920, height=1080):
 
     picam2.configure(picam2.create_preview_configuration(
         main={"format": "RGB888", "size": (width, height)},
-        #lores={"format": "YUV420", "size": (640, 480)}
+        buffer_count=2,
     ))
     picam2.start_preview(Preview.NULL)
     picam2.start()

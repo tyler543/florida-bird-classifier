@@ -1,5 +1,6 @@
 import os
 import time
+import threading
 import cv2 as cv
 from collections import deque
 
@@ -71,17 +72,35 @@ box_x, box_y, box_w, box_h = 0, 0, 300, 220
 
 collecting = False
 
+_display_lock = threading.Lock()
+_display_buf = None
+_display_event = threading.Event()
+
+def _frame_writer():
+    while True:
+        _display_event.wait()
+        _display_event.clear()
+        with _display_lock:
+            buf = _display_buf
+        if buf is not None:
+            with open("/tmp/latest_frame_tmp.raw", "wb") as f:
+                f.write(buf)
+            os.replace("/tmp/latest_frame_tmp.raw", "/tmp/latest_frame.raw")
+
+threading.Thread(target=_frame_writer, daemon=True).start()
+
 start_background()
 picam2 = init_camera()
 
 while True:
     frame = capture_frame(picam2)
     display = cv.cvtColor(cv.resize(frame, (960, 540)), cv.COLOR_BGR2RGB)
-    with open("/tmp/latest_frame_tmp.raw", "wb") as _f:
-        _f.write(display.tobytes())
-    os.replace("/tmp/latest_frame_tmp.raw", "/tmp/latest_frame.raw")
+    with _display_lock:
+        _display_buf = display.tobytes()
+    _display_event.set()
 
-    bg_mask = bg_sub.apply(frame)
+    small = cv.resize(frame, (480, 270))
+    bg_mask = bg_sub.apply(small)
     button_held = button.is_pressed
 
     if button_held and not collecting:
@@ -96,7 +115,8 @@ while True:
         time.sleep(0.3)
         picam2.set_controls({"AfMode": controls.AfModeEnum.Manual, "LensPosition": picam2.capture_metadata()["LensPosition"]})
 
-        bbox = _detect_motion_bbox(bg_mask, frame.shape)
+        raw_bbox = _detect_motion_bbox(bg_mask, small.shape)
+        bbox = tuple(v * 4 for v in raw_bbox)
         try:
             tracker = cv.TrackerCSRT_create()
         except AttributeError:
