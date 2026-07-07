@@ -1,6 +1,7 @@
 extends TextureRect
 
 var timer := 0.0
+var path = "/tmp/latest_frame.jpg"
 
 func _process(delta):
 	timer += delta
@@ -10,9 +11,9 @@ func _process(delta):
 
 	timer = 0.0
 
-	var image := Image.new()
+	if not FileAccess.file_exists(path):
+		return
 
-	var path = "/tmp/latest_frame.jpg"
-
-	if FileAccess.file_exists(path) and image.load(path) == OK:
+	var image = Image.load_from_file(path)
+	if image != null:
 		texture = ImageTexture.create_from_image(image)
