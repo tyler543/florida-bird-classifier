@@ -24,6 +24,9 @@ func _process(_delta):
 			"detection":
 				overlay.update_detections([data])
 
+			"clear":
+				overlay.update_detections([])
+
 			"hud":
 				overlay.update_hud_config(data)
 

@@ -24,6 +24,13 @@ def send_detection(common_name, scientific_name, conservation_status, confidence
         print(f"Overlay UDP error: {e}")
 
 
+def send_clear():
+    try:
+        _sock.sendto(json.dumps({"type": "clear"}).encode("utf-8"), (_UDP_IP, _UDP_PORT))
+    except Exception as e:
+        print(f"Overlay UDP error: {e}")
+
+
 def send_hud_config(layout="layout1", color="#FF0000", fields=None):
     if fields is None:
         fields = ["Common Name", "Scientific Name", "Confidence", "Conservation Status"]

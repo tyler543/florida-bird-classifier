@@ -1,5 +1,6 @@
 import os
 import time
+import queue
 import threading
 import cv2 as cv
 from collections import deque
@@ -19,7 +20,7 @@ from birdlib.camera import init_camera, capture_frame, stop_camera
 from birdlib.button import init_button
 from birdlib.results import print_results, send_results
 from birdlib.BLE import start_background, get_snapshot
-from birdlib.overlay import send_live_frame
+from birdlib.overlay import send_live_frame, send_clear
 
 
 def _detect_motion_bbox(mask, shape):
@@ -89,6 +90,25 @@ def _frame_writer():
 
 threading.Thread(target=_frame_writer, daemon=True).start()
 
+_infer_q = queue.Queue(maxsize=1)
+
+def _infer_worker():
+    global cached_species, cached_confidence, cached_top5
+    while True:
+        crop = _infer_q.get()
+        probs = run_inference(crop, net, transform, DEVICE)
+        prob_deque.append(probs.cpu())
+        avg_probs = average_frames(list(prob_deque))
+        top_probs, top_indices = extract_topk_and_normalize(avg_probs, TOP_N)
+        species, confidence, top5 = get_top_predictions(top_probs, top_indices, classes, TOP_N)
+        if species != "unknown" and confidence >= CONF_THRESHOLD:
+            cached_species = species
+            cached_confidence = confidence
+            cached_top5 = top5
+            print(f"Live avg: {species} ({confidence:.2f})")
+
+threading.Thread(target=_infer_worker, daemon=True).start()
+
 start_background()
 picam2 = init_camera()
 
@@ -110,6 +130,7 @@ while True:
         cached_species = None
         cached_confidence = 0.0
         cached_top5 = {}
+        send_clear()
 
         picam2.set_controls({"AfMode": controls.AfModeEnum.Auto, "AfTrigger": controls.AfTriggerEnum.Start})
         time.sleep(0.3)
@@ -138,18 +159,10 @@ while True:
         if frame_counter % INFERENCE_SKIP == 0:
             crop = _crop_bbox(frame, box_x, box_y, box_w, box_h)
             if crop is not None:
-                probs = run_inference(crop, net, transform, DEVICE)
-                prob_deque.append(probs.cpu())
-
-                avg_probs = average_frames(list(prob_deque))
-                top_probs, top_indices = extract_topk_and_normalize(avg_probs, TOP_N)
-                species, confidence, top5 = get_top_predictions(top_probs, top_indices, classes, TOP_N)
-
-                if species != "unknown" and confidence >= CONF_THRESHOLD:
-                    cached_species = species
-                    cached_confidence = confidence
-                    cached_top5 = top5
-                    print(f"Live avg: {species} ({confidence:.2f}) bbox=({box_x},{box_y},{box_w},{box_h})")
+                try:
+                    _infer_q.put_nowait(crop)
+                except queue.Full:
+                    pass
 
         if cached_species:
             send_live_frame(cached_species, cached_confidence, x=box_x, y=box_y, w=box_w, h=box_h)
@@ -166,7 +179,7 @@ while True:
 
             if predicted_species != "unknown" and confidence >= CONF_THRESHOLD:
                 print_results(predicted_species, confidence, top5, TOP_N)
-                send_results(predicted_species, confidence, top5, sensor=get_snapshot())
+                send_results(predicted_species, confidence, top5, sensor=get_snapshot(), bbox=(box_x, box_y, box_w, box_h))
             else:
                 print("No confident prediction — try holding longer or pointing more directly at the bird")
         else:
