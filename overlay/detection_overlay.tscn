@@ -2,18 +2,30 @@
 
 [ext_resource type="Script" uid="uid://q1j3p7r50pu7" path="res://detection_overlay_(control).gd" id="1_n8ufe"]
 [ext_resource type="Script" uid="uid://be6rgboacr0ea" path="res://udp_receiver_(node).gd" id="2_bbddo"]
+[ext_resource type="Script" uid="uid://camerafeednodescript" path="res://camera_feed_(texture_rect).gd" id="3_camfeed"]
 
 [node name="Main (Node)" type="Node2D" unique_id=1271899762]
 
 [node name="Camera Feed (TextureRect)" type="TextureRect" parent="." unique_id=1782053553]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+expand_mode = 1
+stretch_mode = 6
+script = ExtResource("3_camfeed")
 
 [node name="OverlayLayer (CanvasLayer)" type="CanvasLayer" parent="." unique_id=1019215022]
 
 [node name="DetectionOverlay (Control)" type="Control" parent="OverlayLayer (CanvasLayer)" unique_id=1183146476]
 layout_mode = 3
-anchors_preset = 0
-offset_right = 40.0
-offset_bottom = 40.0
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
 script = ExtResource("1_n8ufe")
 
 [node name="Label" type="Label" parent="OverlayLayer (CanvasLayer)" unique_id=1641470615]

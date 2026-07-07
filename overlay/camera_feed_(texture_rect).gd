@@ -12,7 +12,7 @@ func _process(delta):
 
 	var image := Image.new()
 
-	var path = "C:/camera_test/latest_frame.jpg"
+	var path = "/tmp/latest_frame.jpg"
 
 	if image.load(path) == OK:
 		texture = ImageTexture.create_from_image(image)

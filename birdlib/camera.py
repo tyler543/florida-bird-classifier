@@ -10,7 +10,7 @@ def init_camera(width=1920, height=1080):
         main={"format": "RGB888", "size": (width, height)},
         #lores={"format": "YUV420", "size": (640, 480)}
     ))
-    picam2.start_preview(Preview.DRM, x=0, y=0, width=width, height=height)
+    picam2.start_preview(Preview.NULL)
     picam2.start()
     picam2.set_controls({"AfMode": controls.AfModeEnum.Continuous, "AfSpeed": controls.AfSpeedEnum.Fast})
     return picam2
