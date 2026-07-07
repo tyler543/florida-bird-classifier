@@ -14,5 +14,5 @@ func _process(delta):
 
 	var path = "/tmp/latest_frame.jpg"
 
-	if image.load(path) == OK:
+	if FileAccess.file_exists(path) and image.load(path) == OK:
 		texture = ImageTexture.create_from_image(image)
