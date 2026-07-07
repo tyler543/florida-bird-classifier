@@ -4,6 +4,10 @@ var timer := 0.0
 var path = "/tmp/latest_frame.jpg"
 var cached_texture: ImageTexture = null
 
+func _ready():
+	size = get_viewport_rect().size
+	position = Vector2.ZERO
+
 func _process(delta):
 	timer += delta
 	if timer < 0.1:
