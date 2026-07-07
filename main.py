@@ -20,7 +20,7 @@ from birdlib.camera import init_camera, capture_frame, stop_camera
 from birdlib.button import init_button
 from birdlib.results import print_results, send_results
 from birdlib.BLE import start_background, get_snapshot
-from birdlib.overlay import send_live_frame, send_clear
+from birdlib.overlay import send_live_frame, send_clear, send_hud_config
 
 
 def _detect_motion_bbox(mask, shape):
@@ -111,6 +111,7 @@ threading.Thread(target=_infer_worker, daemon=True).start()
 
 start_background()
 picam2 = init_camera()
+send_hud_config(layout="layout1", color="#FF0000")
 
 while True:
     frame = capture_frame(picam2)
