@@ -111,7 +111,7 @@ threading.Thread(target=_infer_worker, daemon=True).start()
 
 start_background()
 picam2 = init_camera()
-send_hud_config(layout="layout1", color="#FF0000")
+send_hud_config(layout="layout2", color="#FF0000")
 
 while True:
     frame = capture_frame(picam2)
