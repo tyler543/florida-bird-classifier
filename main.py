@@ -2,6 +2,7 @@ import os
 import time
 import queue
 import threading
+import torch
 import cv2 as cv
 from collections import deque
 
@@ -56,6 +57,8 @@ LED = init_button(24)
 
 classes = load_classes("classes.txt")
 num_classes = len(classes)
+
+torch.set_num_threads(2)
 
 net, model_info = load_model(MODEL_NAME, MODEL_PATH, num_classes, DEVICE)
 transform, size = build_transform(model_info)
@@ -115,12 +118,12 @@ send_hud_config(layout="layout2", color="#FF0000")
 
 while True:
     frame = capture_frame(picam2)
-    display = cv.cvtColor(cv.resize(frame, (960, 540)), cv.COLOR_BGR2RGB)
+    half_bgr = cv.resize(frame, (960, 540))
     with _display_lock:
-        _display_buf = display.tobytes()
+        _display_buf = cv.cvtColor(half_bgr, cv.COLOR_BGR2RGB).tobytes()
     _display_event.set()
 
-    small = cv.resize(frame, (480, 270))
+    small = cv.resize(half_bgr, (480, 270))
     bg_mask = bg_sub.apply(small)
     button_held = button.is_pressed
 
@@ -138,21 +141,22 @@ while True:
         picam2.set_controls({"AfMode": controls.AfModeEnum.Manual, "LensPosition": picam2.capture_metadata()["LensPosition"]})
 
         raw_bbox = _detect_motion_bbox(bg_mask, small.shape)
-        bbox = tuple(v * 4 for v in raw_bbox)
+        bbox_half = tuple(v * 2 for v in raw_bbox)
         try:
             tracker = cv.TrackerCSRT_create()
         except AttributeError:
             tracker = cv.legacy.TrackerCSRT_create()
-        tracker.init(frame, bbox)
-        box_x, box_y, box_w, box_h = bbox
+        tracker.init(half_bgr, bbox_half)
+        box_x, box_y, box_w, box_h = tuple(v * 2 for v in bbox_half)
         print("Button held — tracking started...")
 
     elif button_held and collecting:
         frame_counter += 1
 
-        ok, bbox = tracker.update(frame)
+        ok, bbox_half = tracker.update(half_bgr)
         if ok:
-            box_x, box_y, box_w, box_h = [int(v) for v in bbox]
+            bx, by, bw, bh = [int(v) for v in bbox_half]
+            box_x, box_y, box_w, box_h = bx*2, by*2, bw*2, bh*2
         else:
             h_f, w_f = frame.shape[:2]
             box_x, box_y, box_w, box_h = w_f // 2 - 150, h_f // 2 - 110, 300, 220
