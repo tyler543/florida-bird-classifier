@@ -76,7 +76,8 @@ picam2 = init_camera()
 
 while True:
     frame = capture_frame(picam2)
-    cv.imwrite("/tmp/latest_frame_tmp.jpg", frame)
+    display = cv.resize(frame, (960, 540))
+    cv.imwrite("/tmp/latest_frame_tmp.jpg", display, [cv.IMWRITE_JPEG_QUALITY, 70])
     os.replace("/tmp/latest_frame_tmp.jpg", "/tmp/latest_frame.jpg")
 
     bg_mask = bg_sub.apply(frame)

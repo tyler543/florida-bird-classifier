@@ -7,10 +7,11 @@ var cached_texture: ImageTexture = null
 func _ready():
 	size = get_viewport_rect().size
 	position = Vector2.ZERO
+	Input.set_mouse_mode(Input.MOUSE_MODE_HIDDEN)
 
 func _process(delta):
 	timer += delta
-	if timer < 0.1:
+	if timer < 0.033:
 		return
 	timer = 0.0
 
