@@ -1,3 +1,4 @@
+import os
 import time
 import cv2 as cv
 from collections import deque
@@ -75,7 +76,8 @@ picam2 = init_camera()
 
 while True:
     frame = capture_frame(picam2)
-    cv.imwrite("/tmp/latest_frame.jpg", frame)
+    cv.imwrite("/tmp/latest_frame_tmp.jpg", frame)
+    os.replace("/tmp/latest_frame_tmp.jpg", "/tmp/latest_frame.jpg")
 
     bg_mask = bg_sub.apply(frame)
     button_held = button.is_pressed
