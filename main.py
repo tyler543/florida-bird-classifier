@@ -181,10 +181,14 @@ while True:
             if predicted_species != "unknown" and confidence >= CONF_THRESHOLD:
                 print_results(predicted_species, confidence, top5, TOP_N)
                 send_results(predicted_species, confidence, top5, sensor=get_snapshot(), bbox=(box_x, box_y, box_w, box_h))
+                time.sleep(4)
+                send_clear()
             else:
                 print("No confident prediction — try holding longer or pointing more directly at the bird")
+                send_clear()
         else:
             print("No inference ran — try holding longer")
+            send_clear()
 
 # cleanup
 stop_camera(picam2)
