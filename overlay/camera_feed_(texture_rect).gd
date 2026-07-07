@@ -1,7 +1,11 @@
 extends TextureRect
 
+const FRAME_W = 960
+const FRAME_H = 540
+const FRAME_BYTES = FRAME_W * FRAME_H * 3
+const PATH = "/tmp/latest_frame.raw"
+
 var timer := 0.0
-var path = "/tmp/latest_frame.jpg"
 var cached_texture: ImageTexture = null
 
 func _ready():
@@ -11,23 +15,23 @@ func _ready():
 
 func _process(delta):
 	timer += delta
-	if timer < 0.033:
+	if timer < 0.016:
 		return
 	timer = 0.0
 
-	var file = FileAccess.open(path, FileAccess.READ)
+	var file = FileAccess.open(PATH, FileAccess.READ)
 	if file == null:
 		return
 
-	var bytes = file.get_buffer(file.get_length())
+	var bytes = file.get_buffer(FRAME_BYTES)
 	file.close()
 
-	var image = Image.new()
-	if image.load_jpg_from_buffer(bytes) != OK:
+	if bytes.size() != FRAME_BYTES:
 		return
 
-	var img_size = Vector2(image.get_width(), image.get_height())
-	if cached_texture == null or cached_texture.get_size() != img_size:
+	var image = Image.create_from_data(FRAME_W, FRAME_H, false, Image.FORMAT_RGB8, bytes)
+
+	if cached_texture == null:
 		cached_texture = ImageTexture.create_from_image(image)
 		texture = cached_texture
 	else:
