@@ -13,7 +13,7 @@ plots.py
 
 # other files
 *.docx
-*.cp
+*.cpp
 
 # Python cache
 __pycache__/
