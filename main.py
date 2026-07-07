@@ -76,7 +76,7 @@ picam2 = init_camera()
 
 while True:
     frame = capture_frame(picam2)
-    display = cv.resize(frame, (960, 540))
+    display = cv.cvtColor(cv.resize(frame, (960, 540)), cv.COLOR_BGR2RGB)
     with open("/tmp/latest_frame_tmp.raw", "wb") as _f:
         _f.write(display.tobytes())
     os.replace("/tmp/latest_frame_tmp.raw", "/tmp/latest_frame.raw")
