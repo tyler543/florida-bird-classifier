@@ -26,7 +26,8 @@ func _process(delta):
 	if image.load_jpg_from_buffer(bytes) != OK:
 		return
 
-	if cached_texture == null:
+	var img_size = Vector2(image.get_width(), image.get_height())
+	if cached_texture == null or cached_texture.get_size() != img_size:
 		cached_texture = ImageTexture.create_from_image(image)
 		texture = cached_texture
 	else:
