@@ -31,3 +31,6 @@ Thumbs.db
 
 # Secret files
 *.env
+
+# Pi boot files (local reference only)
+boot_files/
