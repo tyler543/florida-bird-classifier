@@ -1,6 +1,36 @@
 import requests
 from config import SUPABASE_URL, SUPABASE_KEY
 
+def _headers():
+    return {
+        "apikey": SUPABASE_KEY,
+        "Authorization": f"Bearer {SUPABASE_KEY}",
+    }
+
+def get_user_from_device(device_serial):
+    url = f"{SUPABASE_URL}/rest/v1/device_codes"
+    params = {
+        "device_serial": f"eq.{device_serial}",
+        "select": "user_id",
+        "limit": "1",
+    }
+    response = requests.get(url, headers=_headers(), params=params)
+    if response.status_code == 200 and response.json():
+        return response.json()[0]["user_id"]
+    return None
+
+def get_hud_settings(user_id):
+    url = f"{SUPABASE_URL}/rest/v1/user_hud_settings"
+    params = {
+        "user_id": f"eq.{user_id}",
+        "select": "settings,hud_version",
+        "limit": "1",
+    }
+    response = requests.get(url, headers=_headers(), params=params)
+    if response.status_code == 200 and response.json():
+        return response.json()[0]
+    return None
+
 def insert_sighting(predicted_species, confidence, top_5, ebird_info, taxonomy=None, bird_id=None, sensor=None):
     url = f"{SUPABASE_URL}/rest/v1/bird_sightings"
 

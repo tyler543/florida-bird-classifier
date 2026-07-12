@@ -37,3 +37,5 @@ TUNING_FILE = os.getenv("TUNING_FILE")
 
 # Device
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
+DEVICE_ID = os.getenv("DEVICE_ID", "FEATHER-000")
+HUD_SYNC_INTERVAL = 2.0  # seconds between Supabase HUD-settings polls
