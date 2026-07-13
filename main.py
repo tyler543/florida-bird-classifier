@@ -22,6 +22,8 @@ from birdlib.results import print_results, send_results
 from birdlib.BLE import start_background, get_snapshot
 from birdlib.overlay import send_live_frame, send_clear
 from birdlib.hud_sync import start_hud_sync
+from birdlib.local_store import init_db
+from birdlib.sync import start_sync_thread
 
 
 def _detect_motion_bbox(mask, shape):
@@ -112,6 +114,8 @@ def _infer_worker():
 
 threading.Thread(target=_infer_worker, daemon=True).start()
 
+init_db()
+start_sync_thread()
 start_background()
 picam2 = init_camera()
 start_hud_sync()
