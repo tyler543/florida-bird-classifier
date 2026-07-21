@@ -18,13 +18,10 @@ from birdlib.inference import (
 )
 from birdlib.camera import init_camera, capture_frame, stop_camera
 from birdlib.button import init_button
-from gpiozero import LED as GpioLED
 from birdlib.results import print_results, send_results
 from birdlib.BLE import start_background, get_snapshot
 from birdlib.overlay import send_live_frame, send_clear
 from birdlib.hud_sync import start_hud_sync
-from birdlib.local_store import init_db
-from birdlib.sync import start_sync_thread
 
 
 def _detect_motion_bbox(mask, shape):
@@ -56,7 +53,7 @@ def _crop_bbox(frame, x, y, w, h):
 
 
 button = init_button(BUTTON_GPIO)
-LED = GpioLED(24)
+LED = init_button(24)
 
 classes = load_classes("classes.txt")
 num_classes = len(classes)
@@ -115,8 +112,6 @@ def _infer_worker():
 
 threading.Thread(target=_infer_worker, daemon=True).start()
 
-init_db()
-start_sync_thread()
 start_background()
 picam2 = init_camera()
 start_hud_sync()
@@ -139,9 +134,7 @@ while True:
         cached_species = None
         cached_confidence = 0.0
         cached_top5 = {}
-        LED.on()
         send_clear()
-
 
         raw_bbox = _detect_motion_bbox(bg_mask, small.shape)
         bbox_half = tuple(v * 2 for v in raw_bbox)
@@ -178,7 +171,6 @@ while True:
     elif not button_held and collecting:
         collecting = False
         tracker = None
-        LED.off()
 
         if prob_deque:
             avg_probs = average_frames(list(prob_deque))
@@ -188,6 +180,7 @@ while True:
             if predicted_species != "unknown" and confidence >= CONF_THRESHOLD:
                 print_results(predicted_species, confidence, top5, TOP_N)
                 send_results(predicted_species, confidence, top5, sensor=get_snapshot(), bbox=(box_x, box_y, box_w, box_h))
+                time.sleep(4)
                 send_clear()
             else:
                 print("No confident prediction — try holding longer or pointing more directly at the bird")
